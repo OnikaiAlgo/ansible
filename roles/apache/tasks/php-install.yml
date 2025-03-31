@@ -1,0 +1,7 @@
+---
+- name: "install php packages"
+  apt:
+    name: "php,php-mysql,php-gd,php-xml,php-mbstring"
+    state: latest
+    changed_when: yes
+  notify: [ "apache restart" ] 

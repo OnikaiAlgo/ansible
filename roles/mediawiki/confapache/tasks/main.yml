@@ -1,0 +1,37 @@
+---
+- name: "mediawiki directory"
+  file:
+    path: "{{mediawiki_directory}}"
+    owner: "www-data"
+    group: "www-data"
+    state: directory
+
+- name: "mediawiki directory"
+  unarchive:
+    src: "{{mediawiki_archive_url}}"
+    dest: "{{mediawiki_directory}}"
+    owner: "www-data"
+    group: "www-data"
+    remote_src: yes
+    extra_opts: "--transform=s/mediawiki-[0-9\.]*\///"
+
+- name: "mediawiki configuration"
+  become: yes
+  become_user: "www-data"
+  command: "php install.php --dbname={{mediawiki_db_name}} --dbuser={{mediawiki_db_user}} --dbpass={{mediawiki_db_password}} --dbserver=localhost --lang=fr --pass=admin --scriptpath=/ --server=http://{{inventory_hostname}}"
+  args:
+    creates: "{{mediawiki_directory}}/LocalSettings.php"
+    chdir: "{{mediawiki_maintenance_directory}}"
+  run_once: yes
+  delegate_to: "{{item}}"
+  with_items: "{{groups.apache}}"
+
+- name: "mediawiki db update"
+  become: yes
+  become_user: "www-data"
+  command: "php update.php --quick"
+  args:
+    chdir: "{{mediawiki_maintenance_directory}}"
+  run_once: yes
+  register: resultat
+  changed_when: "' ...done.' in resultat.stdout" 
