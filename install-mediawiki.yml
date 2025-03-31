@@ -1,0 +1,16 @@
+---
+- name: "MediaWiki db configuration"
+  hosts: bdd1
+  gather_facts: no
+  roles:
+    - role: "mediawiki.confdb"
+  tags:
+    - db
+
+- name: "MediaWiki apache configuration"
+  hosts: http1
+  gather_facts: no
+  roles:
+    - role: "mediawiki.confapache"
+  tags:
+    - apache 
